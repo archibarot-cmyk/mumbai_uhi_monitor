@@ -1,0 +1,456 @@
+/* ==========================================================================
+   Mumbai UHI Monitor — design tokens
+   Palette: deep-space navy dashboard with a thermal (blue→yellow→red) accent
+   for LST, and a separate green→red scale for ward risk levels.
+   Type: IBM Plex Sans for UI text, IBM Plex Mono for numeric sensor readouts.
+   ========================================================================== */
+
+:root {
+  /* base */
+  --bg: #0d1a2b;
+  --panel: #142744;
+  --panel-alt: #1a3054;
+  --border: #2a4568;
+  --text: #e9eef4;
+  --text-muted: #90a6c2;
+  --accent: #4fb3d9;
+
+  /* risk scale */
+  --risk-low: #45b571;
+  --risk-medium: #e3b23c;
+  --risk-high: #e07a2e;
+  --risk-severe: #d64435;
+
+  /* thermal scale (for the LST legend swatch) */
+  --heat-cool: #2e5eaa;
+  --heat-mid: #f2c14e;
+  --heat-hot: #d64435;
+
+  --radius: 10px;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100%;
+}
+
+code {
+  font-family: "IBM Plex Mono", monospace;
+  background: var(--panel-alt);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Alerts banner                                                          */
+/* ---------------------------------------------------------------------- */
+.alerts-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  border: none;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(90deg, #7a1f1a, #b8452f);
+  color: #fff8f0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.alerts-banner:hover { filter: brightness(1.08); }
+.alerts-banner.hidden { display: none; }
+.alerts-banner-cta {
+  font-weight: 500;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Header                                                                 */
+/* ---------------------------------------------------------------------- */
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.app-header-title h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.app-header-subtitle {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.last-updated {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Main layout: map + ranking panel                                       */
+/* ---------------------------------------------------------------------- */
+.app-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  align-items: stretch;
+}
+
+.map-column {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 560px;
+  background: var(--panel);
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+  background: #0a1522;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Weather badge (fixed over map)                                         */
+/* ---------------------------------------------------------------------- */
+.weather-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(20, 39, 68, 0.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.85rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(4px);
+  max-width: 220px;
+}
+.weather-icon { font-size: 1.6rem; line-height: 1; }
+.weather-condition { font-weight: 600; font-size: 0.85rem; text-transform: capitalize; }
+.weather-detail {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Legend (fixed over map)                                                */
+/* ---------------------------------------------------------------------- */
+.legend {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 500;
+  display: flex;
+  gap: 1rem;
+  background: rgba(20, 39, 68, 0.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.9rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(4px);
+  font-size: 0.75rem;
+}
+.legend-title {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+}
+.legend-gradient {
+  width: 110px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--heat-cool), var(--heat-mid), var(--heat-hot));
+}
+.legend-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+.legend-risk-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.risk-Low { background: var(--risk-low); }
+.risk-Medium { background: var(--risk-medium); }
+.risk-High { background: var(--risk-high); }
+.risk-Severe { background: var(--risk-severe); }
+
+/* ---------------------------------------------------------------------- */
+/* Ranking panel                                                          */
+/* ---------------------------------------------------------------------- */
+.ranking-column {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 1rem;
+  min-height: 560px;
+}
+.ranking-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.ranking-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.ward-search-input {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+.ward-search-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: rgba(214, 68, 53, 0.15);
+  border: 1px solid var(--risk-severe);
+  color: #ffd9d1;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-bottom: 0.6rem;
+}
+.filter-chip.hidden { display: none; }
+.filter-chip button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.table-wrap {
+  overflow: auto;
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.ward-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.ward-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-alt);
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ward-table thead th:hover { color: var(--accent); }
+.ward-table thead th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
+.ward-table thead th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
+
+.ward-table tbody td {
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.ward-table tbody tr {
+  cursor: pointer;
+}
+.ward-table tbody tr:hover {
+  background: var(--panel-alt);
+}
+.ward-table td.recommendation-cell {
+  color: var(--text-muted);
+  max-width: 260px;
+}
+.ward-table td.score-cell {
+  font-family: "IBM Plex Mono", monospace;
+}
+.table-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1.5rem 0.5rem !important;
+}
+
+/* Risk pill/badge, used in both table and map popups */
+.risk-pill {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1a1005;
+  white-space: nowrap;
+}
+.risk-pill.risk-Low { background: var(--risk-low); color: #06210f; }
+.risk-pill.risk-Medium { background: var(--risk-medium); color: #2b1f00; }
+.risk-pill.risk-High { background: var(--risk-high); color: #2b1400; }
+.risk-pill.risk-Severe { background: var(--risk-severe); color: #fff2ef; }
+
+/* ---------------------------------------------------------------------- */
+/* Leaflet popup content                                                  */
+/* ---------------------------------------------------------------------- */
+.popup-ward-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+.popup-risk-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.popup-risk-score {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  color: #333;
+}
+.popup-recommendation {
+  font-size: 0.82rem;
+  margin: 0.4rem 0 0.5rem;
+  color: #222;
+}
+.popup-sources summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #345;
+}
+.popup-sources-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 0.7rem;
+  margin-top: 0.4rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  color: #333;
+}
+.popup-sources-grid dt { color: #667; }
+.popup-sources-grid dd { margin: 0; }
+
+/* Leaflet's default popup box has light chrome + padding; keep popup text dark/readable */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+.leaflet-popup-content {
+  min-width: 220px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* About / methodology                                                    */
+/* ---------------------------------------------------------------------- */
+.about-section {
+  margin: 0 1.5rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 0.9rem 1.1rem;
+}
+.about-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.about-content {
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  max-width: 70ch;
+}
+.about-content ul { padding-left: 1.2rem; }
+.about-content li { margin-bottom: 0.35rem; }
+.about-caveat {
+  background: var(--panel-alt);
+  border-left: 3px solid var(--accent);
+  padding: 0.6rem 0.8rem;
+  border-radius: 0 6px 6px 0;
+  color: var(--text);
+}
+
+.app-footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 1rem 1rem 1.5rem;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Responsive: stack columns on narrower / phone screens                  */
+/* ---------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+  .map-column, #map {
+    min-height: 380px;
+  }
+  .ranking-column {
+    min-height: 420px;
+  }
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+  .weather-badge {
+    max-width: 160px;
+    padding: 0.45rem 0.6rem;
+  }
+  .legend {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+}

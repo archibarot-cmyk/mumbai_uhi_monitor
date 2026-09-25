@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mumbai Urban Heat Island Monitor</title>
+
+<!-- Leaflet (CDN, no build tools) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Fonts: Plex Sans for UI, Plex Mono for numeric sensor readouts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ================= ALERTS BANNER ================= -->
+  <!-- Hidden by default; app.js reveals it if any ward is High/Severe risk -->
+  <button id="alertsBanner" class="alerts-banner hidden" type="button">
+    <span id="alertsBannerText">Checking ward risk levels…</span>
+    <span class="alerts-banner-cta">View wards →</span>
+  </button>
+
+  <!-- ================= HEADER ================= -->
+  <header class="app-header">
+    <div class="app-header-title">
+      <h1>Mumbai Urban Heat Island Monitor</h1>
+      <p class="app-header-subtitle">Ward-level heat risk from satellite and climate data</p>
+    </div>
+    <div id="lastUpdated" class="last-updated">Loading data…</div>
+  </header>
+
+  <!-- ================= MAIN LAYOUT: MAP + RANKING PANEL ================= -->
+  <main class="app-main">
+
+    <!-- ----- MAP COLUMN ----- -->
+    <section class="map-column">
+      <div id="map"></div>
+
+      <!-- Weather badge, fixed over the map -->
+      <div id="weatherBadge" class="weather-badge">
+        <span id="weatherIcon" class="weather-icon">⏳</span>
+        <div class="weather-text">
+          <div id="weatherCondition" class="weather-condition">Loading weather…</div>
+          <div id="weatherDetail" class="weather-detail">&nbsp;</div>
+        </div>
+      </div>
+
+      <!-- Legend, fixed over the map -->
+      <div class="legend">
+        <div class="legend-block">
+          <div class="legend-title">Land Surface Temp</div>
+          <div class="legend-gradient"></div>
+          <div class="legend-scale-labels"><span>Cooler</span><span>Hotter</span></div>
+        </div>
+        <div class="legend-block">
+          <div class="legend-title">Ward Risk Level</div>
+          <div class="legend-risk-row"><span class="legend-dot risk-Low"></span>Low</div>
+          <div class="legend-risk-row"><span class="legend-dot risk-Medium"></span>Medium</div>
+          <div class="legend-risk-row"><span class="legend-dot risk-High"></span>High</div>
+          <div class="legend-risk-row"><span class="legend-dot risk-Severe"></span>Severe</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----- RANKING PANEL COLUMN ----- -->
+    <section class="ranking-column">
+      <div class="ranking-header">
+        <h2>Ward Risk Ranking</h2>
+        <input
+          id="wardSearch"
+          type="text"
+          placeholder="Search wards…"
+          class="ward-search-input"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Shown when the alerts banner filter is active -->
+      <div id="filterChip" class="filter-chip hidden">
+        <span id="filterChipText"></span>
+        <button id="filterChipClear" type="button">Clear filter ✕</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="wardTable" class="ward-table">
+          <thead>
+            <tr>
+              <th data-key="ward_name">Ward</th>
+              <th data-key="risk_score">Risk Score</th>
+              <th data-key="risk_level">Risk Level</th>
+              <th data-key="recommendation">Recommendation</th>
+            </tr>
+          </thead>
+          <tbody id="wardTableBody">
+            <tr><td colspan="4" class="table-empty">Loading ward data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= ABOUT / METHODOLOGY ================= -->
+  <details class="about-section">
+    <summary>About this data &amp; methodology</summary>
+    <div class="about-content">
+      <p>
+        This dashboard combines several public satellite and open-data sources to estimate
+        urban heat risk for each ward in Mumbai:
+      </p>
+      <ul>
+        <li><strong>MODIS Land Surface Temperature (LST)</strong> — satellite-derived surface temperature, the basis for the heat overlay and <code>lst</code> values.</li>
+        <li><strong>Sentinel-2 NDVI</strong> — vegetation index used to estimate green cover per ward (<code>ndvi</code>).</li>
+        <li><strong>WorldPop</strong> — gridded population density estimates (<code>population_density_worldpop</code>).</li>
+        <li><strong>NASA POWER</strong> — near-surface air temperature reanalysis data (<code>power_temp</code>).</li>
+        <li><strong>Census 2011</strong> — official ward-level population figures (<code>population_census</code>).</li>
+        <li><strong>ESA WorldCover</strong> — land cover classification used to estimate impervious surface share (<code>impervious_pct</code>).</li>
+      </ul>
+      <p class="about-caveat">
+        <strong>Honest note:</strong> this shows the most recent available satellite pass and
+        modeled estimates for each ward — it is <em>not</em> a literal real-time reading. Satellite
+        revisit times mean the underlying imagery can be anywhere from hours to a couple of weeks
+        old depending on cloud cover and source. Some fields may show "N/A" where a given data
+        source did not have coverage for a ward.
+      </p>
+    </div>
+  </details>
+
+  <footer class="app-footer">
+    Built for Mumbai UHI monitoring · Data sources listed above · Not for emergency use
+  </footer>
+
+  <!-- App logic. See top of app.js for where to point this at your real data files. -->
+  <script src="app.js"></script>
+</body>
+</html>
